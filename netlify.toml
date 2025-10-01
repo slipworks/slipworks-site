@@ -1,0 +1,9 @@
+[build]
+  command = "hugo"
+  publish = "public"
+
+[build.environment]
+  HUGO_VERSION = "0.129.0"
+  HUGO_EXTENDED = "true"
+  GIT_SUBMODULE_STRATEGY = "recursive"
+  HUGO_ENV = "production"
