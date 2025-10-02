@@ -1,9 +1,10 @@
 backend:
   name: github
-  repo: slipworks/slipworks-site  # ← リポジトリを"ユーザー/リポジトリ"で
+  repo: slipworks/slipworks-site
   branch: main
-  base_url: /.netlify/functions      # ← Netlify Functions のベースURL
-  auth_endpoint: decap-oauth         # ← 後述の関数名に合わせる
+  base_url: /.netlify/functions
+  auth_endpoint: oauth-github
+
 
 media_folder: "static/media"
 public_folder: "/media"
