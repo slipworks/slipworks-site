@@ -1,21 +1,4 @@
 [build]
-  command = "pwd; echo '--- list root ---'; ls -al; echo '--- find functions ---'; find . -maxdepth 4 -type f -path '*/functions/*' -print; echo '--- print netlify.toml ---'; sed -n '1,200p' netlify.toml; hugo"
+  command = "hugo"
   publish = "public"
   functions = "netlify/functions"
-  
-
-[build.environment]
-  HUGO_VERSION = "0.129.0"
-  HUGO_EXTENDED = "true"
-  GIT_SUBMODULE_STRATEGY = "recursive"
-  HUGO_ENV = "production"
-
-[functions]
-  node_bundler = "esbuild"
-
-[[redirects]]
-  from = "/oauth/callback"
-  to = "/.netlify/functions/decap-oauth"
-  status = 200
-
-
