@@ -56,30 +56,29 @@ exports.handler = async function (event) {
   // --- 成功時: Decap へ postMessage（provider 付き） ---
  if (accessToken) {
   const siteOrigin = 'https://splendid-hummingbird-b1b121.netlify.app';
-  const userJson = JSON.stringify({ token: '${accessToken}' }); // Decapが読むキーの形式
+  const userJson = JSON.stringify({ token: '${accessToken}' });
 
   const html = `<!doctype html><meta charset="utf-8"><body>
 <script>
   (function () {
     try {
-      // 1) /admin 側の localStorage に直接セット（同一オリジンなので可）
       if (window.opener && window.opener.localStorage) {
+        // ★ Decap と旧 Netlify CMS の両方のキーに書く
         window.opener.localStorage.setItem('decap-cms-user', ${JSON.stringify(userJson)});
+        window.opener.localStorage.setItem('netlify-cms-user', ${JSON.stringify(userJson)});
       }
-      // 2) 念のため postMessage も送る
+      // postMessage（念のため）
       var payload = 'authorization:github:success:' + ${JSON.stringify(userJson)};
       try {
         window.opener && window.opener.postMessage(payload, '${siteOrigin}');
       } catch (e) {
         window.opener && window.opener.postMessage(payload, '*');
       }
-      // 3) /admin をリロードしてUIを切り替える
+      // UIを切り替えるためにリロード
       if (window.opener && window.opener.location) {
         window.opener.location.reload();
       }
-    } catch (e) {
-      // 何かあっても最後にフォールバックで閉じる
-    }
+    } catch (e) {}
     setTimeout(function(){ window.close(); }, 800);
   })();
 </script>
