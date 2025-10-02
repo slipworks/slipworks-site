@@ -1,0 +1,12 @@
+# netlify.toml（ビルド設定を固定）
+[build]
+  command   = "hugo"
+  publish   = "public"
+  functions = "netlify/functions"
+
+# 参考：必要なら Node のバージョンを固定（任意）
+# [build.environment]
+#   NODE_VERSION = "18"
+
+# （任意）/oauth-debug.html のCSPを緩めたい場合は _headers を使うが、
+# すでにHTML内で <meta http-equiv="Content-Security-Policy"> を入れているためここでは未設定。
