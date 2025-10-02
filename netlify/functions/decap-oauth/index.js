@@ -1,19 +1,17 @@
-export async function handler(event) {
-  const params = event.queryStringParameters || {};
-  const { code } = params;
+exports.handler = async function (event) {
+  const params = (event && event.queryStringParameters) || {};
+  const { code, debug } = params;
 
   const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
   const REDIRECT_URI = process.env.OAUTH_REDIRECT_URI; // 例: https://splendid-hummingbird-b1b121.netlify.app/oauth/callback
   const SCOPE = process.env.GITHUB_SCOPE || 'public_repo';
 
-  // ---- ここからデバッグ追加 ----
-  if (params.debug === '1') {
+  // --- デバッグ: 環境変数の有無を確認 ---
+  if (debug === '1') {
     const missing = [];
     if (!CLIENT_ID) missing.push('GITHUB_CLIENT_ID');
     if (!REDIRECT_URI) missing.push('OAUTH_REDIRECT_URI');
-    // CLIENT_SECRET は callback 時のみ必須
-
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -21,17 +19,15 @@ export async function handler(event) {
         ok: missing.length === 0,
         missing,
         values: {
-          CLIENT_ID: !!CLIENT_ID,          // 値の有無だけ true/false で返す
-          REDIRECT_URI,                    // これは文字列をそのまま返す（誤り検出のため）
+          CLIENT_ID: !!CLIENT_ID,
+          REDIRECT_URI,
           SCOPE
         }
       })
     };
   }
-  
-  
-  // ---- デバッグここまで ----
 
+  // --- 認可画面へリダイレクト ---
   if (!code) {
     const state = Math.random().toString(36).slice(2);
     const authorizeUrl = new URL('https://github.com/login/oauth/authorize');
@@ -42,6 +38,7 @@ export async function handler(event) {
     return { statusCode: 302, headers: { Location: authorizeUrl.toString() }, body: '' };
   }
 
+  // --- トークン交換 ---
   const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: { Accept: 'application/json' },
@@ -53,38 +50,33 @@ export async function handler(event) {
     }),
   });
 
-  // …前半はあなたのコードのまま…
+  const data = await tokenRes.json();
+  const accessToken = data.access_token;
 
-const data = await tokenRes.json();
-const accessToken = data.access_token;
+  // --- 成功時: Decap へ postMessage（provider 付き） ---
+  if (accessToken) {
+    const html = `<!doctype html><html><body><script>
+      (function () {
+        var payload = 'authorization:github:success:' + JSON.stringify({
+          token: '${accessToken}',
+          provider: 'github'
+        });
+        if (window.opener) { window.opener.postMessage(payload, '*'); }
+        window.close();
+      })();
+    </script>OK</body></html>`;
+    return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
+  }
 
-// ✅ 成功時：provider を含めて postMessage
-if (accessToken) {
+  // --- 失敗時: エラーを通知 ---
+  const msg = (data && (data.error_description || data.error)) || 'OAuth token exchange failed';
+  const safe = String(msg).replace(/'/g, "\\'");
   const html = `<!doctype html><html><body><script>
     (function () {
-      var payload = 'authorization:github:success:' + JSON.stringify({
-        token: '${accessToken}',
-        provider: 'github'
-      });
-      if (window.opener) {
-        window.opener.postMessage(payload, '*');
-      }
+      var payload = 'authorization:github:failure:' + JSON.stringify({ error: '${safe}' });
+      if (window.opener) { window.opener.postMessage(payload, '*'); }
       window.close();
     })();
-  </script>OK</body></html>`;
-  return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
-}
-
-// ❗失敗時：failure を返す（←これを忘れずに）
-const msg = (data && (data.error_description || data.error)) || 'OAuth token exchange failed';
-const safe = String(msg).replace(/'/g, "\\'");
-const html = `<!doctype html><html><body><script>
-  (function () {
-    var payload = 'authorization:github:failure:' + JSON.stringify({ error: '${safe}' });
-    if (window.opener) {
-      window.opener.postMessage(payload, '*');
-    }
-    window.close();
-  })();
-</script>Error: ${safe}</body></html>`;
-return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: html };
+  </script>Error: ${safe}</body></html>`;
+  return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: html };
+};
