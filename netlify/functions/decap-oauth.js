@@ -4,13 +4,8 @@ export async function handler(event) {
   const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
-  // あなたのサイトのオリジンを一意に決定
+  // サイトのオリジン（本番/プレビュー両対応）
   const siteOrigin = new URL(headers.origin || `https://${headers.host}`).origin;
-
-  // 許可オリジンの判定（サイト自身は必ず許可）
-  const allowed = (process.env.OAUTH_ALLOWED_ORIGINS || siteOrigin)
-    .split(",").map(s => s.trim()).filter(Boolean);
-  if (!allowed.includes(siteOrigin)) allowed.push(siteOrigin);
 
   // authorize: /.netlify/functions/decap-oauth
   if (!path.endsWith('/callback')) {
@@ -19,7 +14,7 @@ export async function handler(event) {
     const u = new URL('https://github.com/login/oauth/authorize');
     u.searchParams.set('client_id', CLIENT_ID);
     u.searchParams.set('redirect_uri', redirect_uri);
-    u.searchParams.set('scope', 'repo,user:email'); // 必要に応じ調整
+    u.searchParams.set('scope', 'repo,user:email'); // 必要に応じて調整
     u.searchParams.set('state', state);
     return { statusCode: 302, headers: { Location: u.toString() }, body: '' };
   }
@@ -28,7 +23,7 @@ export async function handler(event) {
   const code = q?.code;
   if (!code) return { statusCode: 400, body: 'Missing code' };
 
-  // GitHubのコールバックでは Origin が undefined になることがあるため、送信先は常にサイトのオリジンに固定
+  // GitHub code → access_token
   const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: { Accept: 'application/json' },
@@ -42,17 +37,44 @@ export async function handler(event) {
   if (!tokenRes.ok || !tokenJson.access_token) {
     return { statusCode: 401, body: 'OAuth exchange failed' };
   }
-
   const token = tokenJson.access_token;
 
-  // Decap/Netlify CMS 仕様：window.opener に postMessage
+  // Decap（Netlify CMS）仕様：window.opener へ postMessage
+  // 互換重視：targetOrigin を "*" にし、送信後 120ms 待ってから close
   const html = `
 <!doctype html><html><body>
 <script>
   (function() {
     function send(msg) {
       if (window.opener) {
-        // 送信先を常にサイトのオリジンに固定
-        window.opener.postMessage(msg, "${siteOrigin}");
-        window.clo
+        try {
+          console.log('DEBUG: postMessage -> opener', msg);
+          window.opener.postMessage(msg, "*");
+        } catch (e) {
+          console.log('DEBUG: postMessage error', e);
+        }
+        setTimeout(function(){ window.close(); }, 120);
+      } else {
+        document.body.innerText = "Logged in. You can close this window.";
+      }
+    }
+    var payload = JSON.stringify({ token: "${token}", provider: "github" });
+    send("authorization:github:success:" + payload);
+  })();
+</script>
+</body></html>`;
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    body: html
+  };
+}
+
+function randomString(len = 32) {
+  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let s = '';
+  for (let i = 0; i < len; i++) s += abc[Math.floor(Math.random() * abc.length)];
+  return s;
+}
 

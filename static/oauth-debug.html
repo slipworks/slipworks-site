@@ -1,48 +1,51 @@
-<!doctype html>
-<meta charset="utf-8">
-<title>OAuth postMessage Debug</title>
-<style>
-  body { font-family: system-ui, sans-serif; margin: 24px; }
-  pre { background:#111; color:#0f0; padding:12px; overflow:auto; max-height:50vh; }
-  button { padding:10px 16px; font-size:16px; }
-  .ok { color: #0a0; } .ng { color:#c00; }
-  .hint { color:#555; font-size:13px; }
-  .row{margin-top:12px;}
-  code{background:#f4f4f4;padding:2px 4px;border-radius:3px;}
-  .small{font-size:12px;color:#777}
-</style>
-<h1>OAuth postMessage Debug</h1>
-<p>「Start」を押すと <code>/.netlify/functions/decap-oauth</code> をポップアップで開き、<code>postMessage</code> の受信内容をここに表示します。</p>
-<div class="row"><button id="start">Start OAuth test</button> <span id="status" class="hint">（ポップアップ許可が必要な場合あり）</span></div>
-<div class="row"><strong>受信ログ</strong>（新しい順）</div>
-<pre id="log"></pre>
-<div class="small">このページはCMSを介さず動作します。送受信のどこで詰まっているかを切り分けできます。</div>
-<script>
-  const log = (m) => {
-    const el = document.getElementById('log');
-    const now = new Date().toLocaleTimeString();
-    el.textContent = `[${now}] ${m}\n` + el.textContent;
-  };
-  window.addEventListener('message', (ev) => {
-    log(`RECV origin=${ev.origin}  data=${String(ev.data).slice(0,200)}...`);
-    const s = String(ev.data || '');
-    if (s.startsWith('authorization:github:success:')) {
-      const json = s.slice('authorization:github:success:'.length);
-      try {
-        const payload = JSON.parse(json);
-        log('OK token=' + (payload.token ? '(存在)' : '(なし)') + ' provider=' + (payload.provider || '(未指定)'));
-        document.getElementById('status').innerHTML = '<span class="ok">✅ 受信成功：pop→opener 通信OK</span>';
-      } catch(e) {
-        log('NG payload JSON parse error: ' + e);
-        document.getElementById('status').innerHTML = '<span class="ng">⚠️ 形式不一致：payloadがJSONでない</span>';
-      }
-    } else {
-      document.getElementById('status').innerHTML = '<span class="ng">⚠️ 形式不一致：チャネル名が違う</span>';
-    }
-  });
-  document.getElementById('start').addEventListener('click', () => {
-    const w = window.open('/.netlify/functions/decap-oauth', 'oauth', 'width=600,height=700');
-    if (!w) { document.getElementById('status').textContent = 'ポップアップがブロックされました'; }
-  });
-  log('Ready. まずは「Start」を押してください。');
-</script>
+*** /dev/null
+--- a/static/oauth-debug.html
+@@
++<!doctype html>
++<meta charset="utf-8">
++<title>OAuth postMessage Debug</title>
++<style>
++  body { font-family: system-ui, sans-serif; margin: 24px; }
++  pre { background:#111; color:#0f0; padding:12px; overflow:auto; max-height:50vh; }
++  button { padding:10px 16px; font-size:16px; }
++  .ok { color: #0a0; } .ng { color:#c00; }
++  .hint { color:#555; font-size:13px; }
++  .row{margin-top:12px;}
++  code{background:#f4f4f4;padding:2px 4px;border-radius:3px;}
++  .small{font-size:12px;color:#777}
++  </style>
++<h1>OAuth postMessage Debug</h1>
++<p>下のボタンで <code>/.netlify/functions/decap-oauth</code> を別ウィンドウで開き、<code>postMessage</code> の受信内容を表示します。</p>
++<div class="row"><button id="start">Start OAuth test</button> <span id="status" class="hint">（ポップアップ許可が必要な場合あり）</span></div>
++<div class="row"><strong>受信ログ</strong>（新しい順）</div>
++<pre id="log"></pre>
++<div class="small">このページはCMSを介さず動作するため、<code>postMessage</code>の「送受信」可否を切り分けできます。</div>
++<script>
++  const log = (m) => {
++    const el = document.getElementById('log');
++    const now = new Date().toLocaleTimeString();
++    el.textContent = `[${now}] ${m}\n` + el.textContent;
++  };
++  window.addEventListener('message', (ev) => {
++    log(`RECV origin=${ev.origin}  data=${String(ev.data).slice(0,200)}...`);
++    // 期待形式: "authorization:github:success:" + JSON(payload)
++    const s = String(ev.data || '');
++    if (s.startsWith('authorization:github:success:')) {
++      const json = s.slice('authorization:github:success:'.length);
++      try {
++        const payload = JSON.parse(json);
++        log('OK token=' + (payload.token ? '(存在)' : '(なし)') + ' provider=' + (payload.provider || '(未指定)'));
++        document.getElementById('status').innerHTML = '<span class="ok">✅ 受信成功：pop→opener の通信は有効</span>';
++      } catch(e) {
++        log('NG payload JSON parse error: ' + e);
++        document.getElementById('status').innerHTML = '<span class="ng">⚠️ 形式不一致：payloadがJSONでない</span>';
++      }
++    } else {
++      document.getElementById('status').innerHTML = '<span class="ng">⚠️ 形式不一致：チャネル名が違う</span>';
++    }
++  });
++  document.getElementById('start').addEventListener('click', () => {
++    const w = window.open('/.netlify/functions/decap-oauth', 'oauth', 'width=600,height=700');
++    if (!w) { document.getElementById('status').textContent = 'ポップアップがブロックされました'; }
++  });
++</script>
