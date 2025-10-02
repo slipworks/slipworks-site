@@ -1,5 +1,4 @@
 // /netlify/functions/ping.js
 export async function handler() {
-  return { statusCode: 200, body: 'hello
-  ' };
+  return { statusCode: 200, body: 'ok' };
 }
