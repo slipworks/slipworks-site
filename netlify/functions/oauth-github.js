@@ -1,4 +1,4 @@
-// netlify/functions/oauth-github.js  (CommonJS/安全な文字列埋め込み)
+// netlify/functions/oauth-github.js  (CommonJS / Base64 埋め込みで安全化)
 exports.handler = async (event) => {
   const { path, queryStringParameters: q = {}, headers = {} } = event;
   const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
@@ -11,7 +11,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      body: 'VER: oauth-github 2025-10-03-06'
+      body: 'VER: oauth-github 2025-10-03-07'
     };
   }
 
@@ -40,39 +40,10 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: 'OAuth exchange failed' };
   }
 
-  const token = tokenJson.access_token;
-  const payloadObj = { token, provider: 'github' };
-  const payloadJson = JSON.stringify(payloadObj);
-
-  // スクリプト文字列に安全に埋め込むためのエスケープ
-  const jsLiteral = payloadJson
-    .replace(/\\/g, '\\\\')   // バックスラッシュ
-    .replace(/"/g, '\\"')     // ダブルクォート
-    .replace(/</g, '\\u003c'); // </script> 破断対策
-
+  const payloadObj = { token: tokenJson.access_token, provider: 'github' };
+  const payloadB64 = Buffer.from(JSON.stringify(payloadObj)).toString('base64');
   const originLiteral = JSON.stringify(siteOrigin);
 
-  // 文字列連結（テンプレートリテラル不使用＝埋め込みの事故を防止）
+  // 文字列連結のみ（テンプレート記法を避け、埋め込み事故防止）
   const html =
-    '<!doctype html><meta charset="utf-8"><body style="font-family:system-ui,sans-serif;padding:16px">' +
-    '<div>Login OK. このウィンドウは自動で閉じます。</div>' +
-    '<script>(function(){' +
-      'var payload=JSON.parse("' + jsLiteral + '");' +
-      'var origin=' + originLiteral + ';' +
-      'var msg="authorization:github:success:"+JSON.stringify(payload);' +
-      'try{' +
-        'if(window.opener){' +
-          'window.opener.postMessage(msg, origin);' +
-          'setTimeout(function(){window.close();},120);' +
-        '}else{' +
-          'document.body.innerText="Logged in. You can close this window.";' +
-        '}' +
-      '}catch(e){}' +
-    '})();</script></body>';
-
-  return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: html };
-};
-
-function randomString(len = 32) {
-  c
-::contentReference[oaicite:0]{index=0}
+    '<!doctype html><meta charset="utf-8"><body sty
