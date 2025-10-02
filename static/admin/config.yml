@@ -1,11 +1,14 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: slipworks/slipworks-site  # ← リポジトリを"ユーザー/リポジトリ"で
   branch: main
+  base_url: /.netlify/functions      # ← Netlify Functions のベースURL
+  auth_endpoint: decap-oauth         # ← 後述の関数名に合わせる
 
 media_folder: "static/media"
 public_folder: "/media"
 
-local_backend: true
+local_backend: true  # ローカル編集時に使いたいなら残してOK
 
 collections:
   - name: "pages"
@@ -28,3 +31,4 @@ collections:
       - { label: "Publish Date", name: "date", widget: "datetime" }
       - { label: "Body", name: "body", widget: "markdown" }
       - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
+

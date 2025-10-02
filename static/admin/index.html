@@ -3,10 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>Content Manager</title>
+	
+	  <!-- （任意）管理画面用のCSSを読みたい場合だけ -->
+    <!-- <link rel="stylesheet" href="/admin/preview.css"> -->
+	
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
     <!-- Decap CMS バンドル -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+	<!-- ここには特にマウント用のDOM要素は不要です -->
+    <!-- ↓↓↓ これを必ず **</body> の直前** に1回だけ置く ↓↓↓ -->
+    <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
+    <!-- ↑↑↑ decap-cms本体。これが config.yml を自動で読み込みます ↑↑↑ -->
+
+    <!-- （任意）プレビューやウィジェットの拡張を入れるなら、その**後**に -->
+    <script>
+      // 例：管理画面のプレビューにCSSを適用したい場合
+      // CMS.registerPreviewStyle('/admin/preview.css');
+      // 例：プレビュー用テンプレートやカスタムウィジェットの登録など
+      // CMS.registerPreviewTemplate('posts', PostPreview);
+    </script>
+	
   </body>
 </html>
