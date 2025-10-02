@@ -28,6 +28,8 @@ export async function handler(event) {
       })
     };
   }
+  
+  
   // ---- デバッグここまで ----
 
   if (!code) {
@@ -51,28 +53,38 @@ export async function handler(event) {
     }),
   });
 
-  const data = await tokenRes.json();
-  const accessToken = data.access_token;
+  // …前半はあなたのコードのまま…
 
-  if (accessToken) {
-    const html = `<!doctype html><html><body><script>
-      (function(){
-        var payload='authorization:github:success:'+JSON.stringify({token:'${accessToken}'});
-        window.opener&&window.opener.postMessage(payload,'*'); window.close();
-      })();
-    </script>Success</body></html>`;
-    return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
-  } else {
-    const msg = (data && (data.error_description||data.error)) || 'OAuth token exchange failed';
-    const safe = String(msg).replace(/'/g,"\\'");
-    const html = `<!doctype html><html><body><script>
-      (function(){
-        var payload='authorization:github:failure:'+JSON.stringify({error:'${safe}'});
-        window.opener&&window.opener.postMessage(payload,'*'); window.close();
-      })();
-    </script>Error: ${safe}</body></html>`;
-    return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: html };
-  }
+const data = await tokenRes.json();
+const accessToken = data.access_token;
+
+// ✅ 成功時：provider を含めて postMessage
+if (accessToken) {
+  const html = `<!doctype html><html><body><script>
+    (function () {
+      var payload = 'authorization:github:success:' + JSON.stringify({
+        token: '${accessToken}',
+        provider: 'github'
+      });
+      if (window.opener) {
+        window.opener.postMessage(payload, '*');
+      }
+      window.close();
+    })();
+  </script>OK</body></html>`;
+  return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
 }
 
-
+// ❗失敗時：failure を返す（←これを忘れずに）
+const msg = (data && (data.error_description || data.error)) || 'OAuth token exchange failed';
+const safe = String(msg).replace(/'/g, "\\'");
+const html = `<!doctype html><html><body><script>
+  (function () {
+    var payload = 'authorization:github:failure:' + JSON.stringify({ error: '${safe}' });
+    if (window.opener) {
+      window.opener.postMessage(payload, '*');
+    }
+    window.close();
+  })();
+</script>Error: ${safe}</body></html>`;
+return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: html };
