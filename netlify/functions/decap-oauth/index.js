@@ -55,26 +55,39 @@ exports.handler = async function (event) {
 
   // --- 成功時: Decap へ postMessage（provider 付き） ---
  if (accessToken) {
-  const siteOrigin = 'https://splendid-hummingbird-b1b121.netlify.app'; // 管理画面と同じオリジン
+  const siteOrigin = 'https://splendid-hummingbird-b1b121.netlify.app';
+  const userJson = JSON.stringify({ token: '${accessToken}' }); // Decapが読むキーの形式
+
   const html = `<!doctype html><meta charset="utf-8"><body>
 <script>
   (function () {
-    var payload = 'authorization:github:success:' + JSON.stringify({ token: '${accessToken}' });
     try {
-      // 同一オリジン宛てに postMessage（Decap は origin チェックをするため、明示しておく）
-      window.opener && window.opener.postMessage(payload, '${siteOrigin}');
+      // 1) /admin 側の localStorage に直接セット（同一オリジンなので可）
+      if (window.opener && window.opener.localStorage) {
+        window.opener.localStorage.setItem('decap-cms-user', ${JSON.stringify(userJson)});
+      }
+      // 2) 念のため postMessage も送る
+      var payload = 'authorization:github:success:' + ${JSON.stringify(userJson)};
+      try {
+        window.opener && window.opener.postMessage(payload, '${siteOrigin}');
+      } catch (e) {
+        window.opener && window.opener.postMessage(payload, '*');
+      }
+      // 3) /admin をリロードしてUIを切り替える
+      if (window.opener && window.opener.location) {
+        window.opener.location.reload();
+      }
     } catch (e) {
-      // 念のためフォールバック
-      window.opener && window.opener.postMessage(payload, '*');
+      // 何かあっても最後にフォールバックで閉じる
     }
-    // 受信が間に合うよう少し待ってから閉じる
-    setTimeout(function(){ window.close(); }, 1200);
+    setTimeout(function(){ window.close(); }, 800);
   })();
 </script>
-<p>Login OK. このウィンドウは自動で閉じます（閉じない場合は手動で閉じてください）。</p>
+<p>Login OK. このウィンドウは自動で閉じます。</p>
 </body>`;
   return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
 }
+
 
 
 
