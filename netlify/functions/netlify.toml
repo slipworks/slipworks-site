@@ -1,8 +1,0 @@
-[build]
-  command   = "hugo"
-  publish   = "public"
-  functions = "netlify/functions"
-
-[build.environment]
-  # Netlifyが指定版のHugo(extended)を自動インストールします
-  HUGO_VERSION = "0.124.1"
