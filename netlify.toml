@@ -1,9 +1,8 @@
-(
-echo [build]
-echo   command   = "hugo"
-echo   publish   = "public"
-echo   functions = "netlify/functions"
-echo
-echo [build.environment]
-echo   HUGO_VERSION = "0.124.1"
-) > netlify.toml
+[build]
+  command   = "hugo"
+  publish   = "public"
+  functions = "netlify/functions"
+
+[build.environment]
+  HUGO_VERSION = "0.124.1"
+
