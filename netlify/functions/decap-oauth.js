@@ -39,30 +39,39 @@ export async function handler(event) {
   }
   const token = tokenJson.access_token;
 
-  // Decap（Netlify CMS）仕様：window.opener へ postMessage
-  // 互換重視：targetOrigin を "*" にし、送信後 120ms 待ってから close
+  // 可視ログ + postMessage + localStorage にも書き込む（デバッグ用）
+  const payload = JSON.stringify({ token, provider: "github" });
   const html = `
-<!doctype html><html><body>
+<!doctype html><meta charset="utf-8"><body style="font-family:system-ui,sans-serif;padding:16px">
+<h2>OAuth Callback</h2>
+<div id="log">準備中…</div>
 <script>
   (function() {
-    function send(msg) {
-      if (window.opener) {
-        try {
-          console.log('DEBUG: postMessage -> opener', msg);
-          window.opener.postMessage(msg, "*");
-        } catch (e) {
-          console.log('DEBUG: postMessage error', e);
-        }
-        setTimeout(function(){ window.close(); }, 120);
-      } else {
-        document.body.innerText = "Logged in. You can close this window.";
-      }
+    var payload = ${JSON.stringify(payload)};
+    var log = function(m){ document.getElementById('log').innerHTML += '<div>'+m+'</div>'; };
+
+    // opener へ postMessage（互換重視のため '*'）
+    try {
+      window.opener && window.opener.postMessage("authorization:github:success:" + payload, "*");
+      log("✅ postMessage 送信しました");
+    } catch(e) {
+      log("⚠️ postMessage 失敗: " + (e && e.message));
     }
-    var payload = JSON.stringify({ token: "${token}", provider: "github" });
-    send("authorization:github:success:" + payload);
+
+    // デバッグ用に同一オリジンの localStorage にも保存
+    try {
+      localStorage.setItem("oauth_debug", payload);
+      log("✅ localStorage.oauth_debug に保存しました");
+    } catch(e) {
+      log("⚠️ localStorage 保存失敗: " + (e && e.message));
+    }
+
+    // 2秒表示してから自動クローズ（手動で閉じてもOK）
+    log("このウィンドウは2秒後に自動で閉じます");
+    setTimeout(function(){ window.close(); }, 2000);
   })();
 </script>
-</body></html>`;
+</body>`;
 
   return {
     statusCode: 200,
@@ -77,4 +86,3 @@ function randomString(len = 32) {
   for (let i = 0; i < len; i++) s += abc[Math.floor(Math.random() * abc.length)];
   return s;
 }
-
