@@ -5,12 +5,12 @@ export async function handler(event) {
   const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
   const siteOrigin = new URL(headers.origin || `https://${headers.host}`).origin;
 
-  // ★デプロイ確認用（?test=1 でバージョン表示のみ）
+  // デプロイ確認用: ?test=1 でバージョン表示
   if (q?.test === '1') {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      body: 'VER: oauth-github 2025-10-03-01'
+      body: 'VER: oauth-github 2025-10-03-02'
     };
   }
 
@@ -43,23 +43,24 @@ export async function handler(event) {
   const token = tokenJson.access_token;
   const payload = JSON.stringify({ token, provider: 'github' });
 
+  // ★ここがポイント：送信先を常に「自サイトのオリジン」に固定
   const html = `
 <!doctype html><meta charset="utf-8"><body style="font-family:system-ui,sans-serif;padding:16px">
-<h2>OAuth Callback</h2>
-<div id="log">Login OK. このウィンドウは自動で閉じます。</div>
+<div>Login OK. このウィンドウは自動で閉じます。</div>
 <script>
   (function() {
-    try { window.opener && window.opener.postMessage("authorization:github:success:" + ${JSON.stringify(payload)}, "*"); } catch(e) {}
-    setTimeout(function(){ window.close(); }, 120);
+    function send(msg) {
+      if (window.opener) {
+        try {
+          window.opener.postMessage(msg, "${siteOrigin}");
+        } catch(e) {}
+        setTimeout(function(){ window.close(); }, 120);
+      } else {
+        document.body.innerText = "Logged in. You can close this window.";
+      }
+    }
+    var payload = ${JSON.stringify(payload)};
+    send("authorization:github:success:" + payload);
   })();
 </script>
 </body>`;
-  return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: html };
-}
-
-function randomString(len = 32) {
-  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let s = '';
-  for (let i = 0; i < len; i++) s += abc[Math.floor(Math.random() * abc.length)];
-  return s;
-}
