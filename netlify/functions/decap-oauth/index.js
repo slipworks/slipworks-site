@@ -55,18 +55,18 @@ exports.handler = async function (event) {
 
   // --- 成功時: Decap へ postMessage（provider 付き） ---
   if (accessToken) {
-    const html = `<!doctype html><html><body><script>
-      (function () {
-        var payload = 'authorization:github:success:' + JSON.stringify({
-          token: '${accessToken}',
-          provider: 'github'
-        });
-        if (window.opener) { window.opener.postMessage(payload, '*'); }
-        window.close();
-      })();
-    </script>OK</body></html>`;
-    return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
-  }
+  const html = `<!doctype html><html><body><script>
+    (function () {
+      var payload = 'authorization:github:success:' + JSON.stringify({
+        token: '${accessToken}'
+      });
+      if (window.opener) { window.opener.postMessage(payload, '*'); }
+      window.close();
+    })();
+  </script>OK</body></html>`;
+  return { statusCode: 200, headers: { 'Content-Type': 'text/html' }, body: html };
+}
+
 
   // --- 失敗時: エラーを通知 ---
   const msg = (data && (data.error_description || data.error)) || 'OAuth token exchange failed';
