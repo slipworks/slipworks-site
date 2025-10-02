@@ -4,5 +4,5 @@
   functions = "netlify/functions"
 
 [build.environment]
-  HUGO_VERSION = "0.124.1"
+  HUGO_VERSION = "0.129.0"
 
