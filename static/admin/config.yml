@@ -2,7 +2,7 @@ backend:
   name: github
   repo: slipworks/slipworks-site
   branch: main
-  auth_endpoint: /.netlify/functions/decap-oauth
+    auth_endpoint: https://splendid-hummingbird-b1b121.netlify.app/.netlify/functions/oauth
 
 
 
