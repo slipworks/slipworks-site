@@ -3,7 +3,7 @@ backend:
   repo: slipworks/slipworks-site
   branch: main
   base_url: https://splendid-hummingbird-b1b121.netlify.app
-  auth_endpoint: /auth
+  auth_endpoint: /.netlify/functions/oauth
 media_folder: "static/uploads"
 public_folder: "/uploads"
 collections:
