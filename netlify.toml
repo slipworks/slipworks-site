@@ -14,3 +14,8 @@
   to = "/admin/index.html"
   status = 200
   force = true
+[[redirects]]
+  from = "/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+  force = true
