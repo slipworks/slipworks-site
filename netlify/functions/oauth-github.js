@@ -1,49 +1,123 @@
-// netlify/functions/oauth-github.js  (CommonJS / Base64 埋め込みで安全化)
-exports.handler = async (event) => {
-  const { path, queryStringParameters: q = {}, headers = {} } = event;
-  const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-  const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+'use strict';
 
-  const siteOrigin = new URL(headers.origin || `https://${headers.host}`).origin;
+// Plain JS / CommonJS only. ASCII only. No template literals.
 
-  // デプロイ確認: ?test=1
-  if (q.test === '1') {
+function HTML(ok, dataOrMessage) {
+  var payload = ok
+    ? Object.assign({ ok: true }, dataOrMessage || {})
+    : { ok: false, error: String(dataOrMessage || 'OAuth failed') };
+  var b64 = Buffer.from(JSON.stringify(payload)).toString('base64');
+
+  var html = '<!doctype html>' +
+    '<meta charset="utf-8">' +
+    '<title>OAuth Result</title>' +
+    '<script>(function(){try{' +
+      'var b64="' + b64 + '";' +
+      'var json=JSON.parse(atob(b64));' +
+      'if(window.opener && !window.opener.closed){' +
+        'window.opener.postMessage({source:"netlify-oauth",payload:json},"*");' +
+      '}' +
+      'location.replace(location.pathname+"#payload="+b64);' +
+    '}catch(e){}' +
+    'setTimeout(function(){window.close();},50);' +
+    '})()</script>' +
+    '<p>Authentication ' + (ok ? 'succeeded' : 'failed') + ' - you can close this window.</p>';
+  return html;
+}
+
+exports.handler = async function (event) {
+  if (event.httpMethod !== 'GET') {
     return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      body: 'VER: oauth-github 2025-10-03-07'
+      statusCode: 405,
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Method Not Allowed'
     };
   }
 
-  // authorize フェーズ
-  if (!String(path || '').endsWith('/callback')) {
-    const redirect_uri = `${siteOrigin}/.netlify/functions/oauth-github/callback`;
-    const u = new URL('https://github.com/login/oauth/authorize');
-    u.searchParams.set('client_id', CLIENT_ID);
-    u.searchParams.set('redirect_uri', redirect_uri);
-    u.searchParams.set('scope', 'repo,user:email');
-    u.searchParams.set('state', randomString());
-    return { statusCode: 302, headers: { Location: u.toString() }, body: '' };
+  var qs = event.queryStringParameters || {};
+  var code = qs.code;
+  var state = qs.state;
+
+  if (!code) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      body: HTML(false, 'Missing "code" parameter')
+    };
   }
 
-  // callback フェーズ
-  const code = q.code;
-  if (!code) return { statusCode: 400, body: 'Missing code' };
+  // Env vars
+  var client_id = process.env.GITHUB_CLIENT_ID;
+  var client_secret = process.env.GITHUB_CLIENT_SECRET;
+  // Use GITHUB_REDIRECT_URI (we added it in dashboard)
+  var redirect_uri = process.env.GITHUB_REDIRECT_URI || null;
 
-  const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: { Accept: 'application/json' },
-    body: new URLSearchParams({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code })
-  });
-  const tokenJson = await tokenRes.json();
-  if (!tokenRes.ok || !tokenJson.access_token) {
-    return { statusCode: 401, body: 'OAuth exchange failed' };
+  if (!client_id || !client_secret) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      body: HTML(false, 'Server is missing GitHub OAuth env vars')
+    };
   }
 
-  const payloadObj = { token: tokenJson.access_token, provider: 'github' };
-  const payloadB64 = Buffer.from(JSON.stringify(payloadObj)).toString('base64');
-  const originLiteral = JSON.stringify(siteOrigin);
+  try {
+    // 1) Exchange code for token
+    var tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: client_id,
+        client_secret: client_secret,
+        code: code,
+        ...(redirect_uri ? { redirect_uri: redirect_uri } : {}),
+        ...(state ? { state: state } : {})
+      })
+    });
 
-  // 文字列連結のみ（テンプレート記法を避け、埋め込み事故防止）
-  const html =
-    '<!doctype html><meta charset="utf-8"><body sty
+    var tokenJson = await tokenRes.json();
+    if (!tokenRes.ok || !tokenJson.access_token) {
+      throw new Error(tokenJson.error_description || 'Failed to get access_token');
+    }
+
+    var access_token = tokenJson.access_token;
+
+    // 2) Optional: identify user
+    var userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': 'Bearer ' + access_token,
+        'User-Agent': 'slipworks-oauth'
+      }
+    });
+    var userJson = await userRes.json();
+
+    // 3) Return HTML that posts back to opener
+    var data = {
+      provider: 'github',
+      token: access_token,
+      token_type: tokenJson.token_type || 'bearer',
+      scope: tokenJson.scope || '',
+      state: state || null,
+      user: {
+        id: userJson && userJson.id,
+        login: userJson && userJson.login,
+        name: userJson && userJson.name,
+        avatar_url: userJson && userJson.avatar_url
+      }
+    };
+
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      body: HTML(true, data)
+    };
+  } catch (err) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      body: HTML(false, (err && err.message) ? err.message : 'Unexpected error')
+    };
+  }
+};
