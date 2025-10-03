@@ -4,7 +4,7 @@ exports.handler = async function(event){
   const qs = event.queryStringParameters 
   const code = qs.code 
   const state = qs.state 
-  function page(msg){return '<!doctype html><meta charset="utf-8"><title>OAuth Callback</title><body>Completing sign-in...</body><script>(function(){try{var ORIGIN="' + ORIGIN + '";function send(s){try{if(window.opener&&!window.opener.closed){window.opener.postMessage(s,ORIGIN);}}catch(e){}}function onPing(e){if(e.origin!==ORIGIN)return;window.removeEventListener("message",onPing);send(msg);setTimeout(function(){try{if(window.opener&&!window.opener.closed){window.close();}}catch(_){}} ,120);}window.addEventListener("message",onPing);window.opener?window.opener.postMessage("authorizing:github",ORIGIN):null;}catch(_){}})();</script>'; }
+  function page(msg){return '<!doctype html><meta charset="utf-8"><title>OAuth Callback</title><body>Completing sign-in...</body><script>(function(){try{var ORIGIN="' + ORIGIN + '";var MSG=' + 'msg' + ';if(window.opener&&typeof window.opener.postMessage==="function"){window.opener.postMessage(MSG,ORIGIN);}setTimeout(function(){try{if(window.opener&&!window.opener.closed){window.close();}}catch(_){}} ,120);}catch(_){}})();</script>'; }
   function errPage(message){ return page('authorization:github:error:'+JSON.stringify({message:String(message
   if(!code){ return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: errPage('Missing "code" parameter') }; }
   const client_id = process.env.GITHUB_CLIENT_ID;
