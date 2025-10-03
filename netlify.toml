@@ -18,6 +18,11 @@
   force = true
 [[redirects]]
   from = "/auth"
-  to = "/.netlify/functions/decap-oauth"
+  to = "/.netlify/functions/oauth"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/auth/callback"
+  to = "/.netlify/functions/oauth_callback"
   status = 200
   force = true
