@@ -2,37 +2,40 @@ backend:
   name: github
   repo: slipworks/slipworks-site
   branch: main
-  auth_endpoint: https://splendid-hummingbird-b1b121.netlify.app/.netlify/functions/decap-oauth
-
-
-
+  auth_endpoint: "https://splendid-hummingbird-b1b121.netlify.app/.netlify/functions/decap-oauth"
+site_url: "https://splendid-hummingbird-b1b121.netlify.app"
 media_folder: "static/media"
 public_folder: "/media"
-
-local_backend: true  # ローカル編雁E��に使ぁE��ぁE��ら残してOK
-
 collections:
-  - name: "pages"
-    label: "Pages"
+  - name: pages
+    label: Pages
     files:
-      - file: "content/about/_index.md"
-        label: "About"
-        name: "about"
+      - file: content/about/_index.md
+        label: About
+        name: about
         fields:
-          - { label: "Title", name: "title", widget: "string" }
-          - { label: "Body",  name: "body",  widget: "markdown" }
-
-  - name: "news"
-    label: "News"
-    folder: "content/news"
+          - label: Title
+            name: title
+            widget: string
+          - label: Body
+            name: body
+            widget: markdown
+  - name: news
+    label: News
+    folder: content/news
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Publish Date", name: "date", widget: "datetime" }
-      - { label: "Body", name: "body", widget: "markdown" }
-      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
-
-
-site_url: https://splendid-hummingbird-b1b121.netlify.app
-
+      - label: Title
+        name: title
+        widget: string
+      - label: Publish Date
+        name: date
+        widget: datetime
+      - label: Body
+        name: body
+        widget: markdown
+      - label: Thumbnail
+        name: thumbnail
+        widget: image
+        required: false
