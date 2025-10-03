@@ -1,8 +1,9 @@
-[build]
-  command   = "hugo"
-  publish   = "public"
-  functions = "netlify/functions"
-
-[build.environment]
-  HUGO_VERSION = "0.150.0"
-  HUGO_EXTENDED = "true"
+[[redirects]]
+from = "/auth"
+to = "/.netlify/functions/oauth_auth"
+status = 200
+ECHO ÇÕ <ON> Ç≈Ç∑ÅB
+[[redirects]]
+from = "/callback"
+to = "/.netlify/functions/oauth_callback"
+status = 200
