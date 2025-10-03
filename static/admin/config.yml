@@ -1,8 +1,6 @@
 backend:
-  name: github
-  repo: slipworks/slipworks-site
-  base_url: https://splendid-hummingbird-b1b121.netlify.app
-  auth_endpoint: /auth
+  name: git-gateway
+  branch: main
 media_folder: "static/uploads"
 public_folder: "/uploads"
 collections:
@@ -14,4 +12,3 @@ collections:
     fields:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Body", name: "body", widget: "markdown"}
-# bump
