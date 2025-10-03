@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>OAuth Callback</title>
+<body>Completing sign-in... You can close this window.</body>
+<script>
+var p=new URLSearchParams(location.search);
+if(!p.get('code')&&!p.get('access_token')&&location.hash){var h=new URLSearchParams(location.hash.slice(1));h.forEach(function(v,k){p.set(k,v);});}
+var msg={type:'oauth:done',provider:'github',success:!p.get('error'),code:p.get('code')
+try{if(window.opener){if(typeof window.opener.postMessage==='function'){window.opener.postMessage(msg,'https://splendid-hummingbird-b1b121.netlify.app');}}}catch(e){}
+setTimeout(function(){try{window.close();}catch(e){}},120);
+</script>
+</html>
