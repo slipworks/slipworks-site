@@ -5,8 +5,3 @@ ECHO ÇÕ <ON> Ç≈Ç∑ÅB
 [build.environment]
   HUGO_VERSION = "0.134.3"
   HUGO_ENV = "production"
-ECHO ÇÕ <ON> Ç≈Ç∑ÅB
-[[redirects]]
-  from = "/admin"
-  to = "/admin/index.html"
-  status = 200
