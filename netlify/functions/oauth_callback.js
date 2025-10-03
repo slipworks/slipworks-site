@@ -1,8 +1,28 @@
-exports.handler = async function(event) {
-  const qs = event.queryStringParameters ? event.queryStringParameters : {};
-  if (qs.health) {
-    return { statusCode: 200, headers: {'Content-Type':'text/plain; charset=utf-8'}, body: 'ok' };
+'use strict';
+exports.handler = async function(event){
+  const ORIGIN = 'https://splendid-hummingbird-b1b121.netlify.app';
+  const qs = event.queryStringParameters 
+  const code = qs.code 
+  const state = qs.state 
+  function page(msg){return '<!doctype html><meta charset="utf-8"><title>OAuth Callback</title><body>Completing sign-in...</body><script>(function(){try{var ORIGIN="' + ORIGIN + '";function send(s){try{if(window.opener&&!window.opener.closed){window.opener.postMessage(s,ORIGIN);}}catch(e){}}function onPing(e){if(e.origin!==ORIGIN)return;window.removeEventListener("message",onPing);send(msg);setTimeout(function(){try{if(window.opener&&!window.opener.closed){window.close();}}catch(_){}} ,120);}window.addEventListener("message",onPing);window.opener?window.opener.postMessage("authorizing:github",ORIGIN):null;}catch(_){}})();</script>'; }
+  function errPage(message){ return page('authorization:github:error:'+JSON.stringify({message:String(message
+  if(!code){ return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: errPage('Missing "code" parameter') }; }
+  const client_id = process.env.GITHUB_CLIENT_ID;
+  const client_secret = process.env.GITHUB_CLIENT_SECRET;
+  const redirect_uri = process.env.GITHUB_REDIRECT_URI 
+  if(!client_id||!client_secret){ return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: errPage('Server is missing GitHub OAuth env vars') }; }
+  try{
+    const bodyObj = { client_id, client_secret, code };
+    if(redirect_uri) bodyObj.redirect_uri = redirect_uri;
+    if(state) bodyObj.state = state;
+    const res = await fetch('https://github.com/login/oauth/access_token',{ method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+    const js = await res.json();
+    if(!res.ok || !js.access_token){ return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: errPage(js.error_description || 'Failed to get access_token') }; }
+    const token = js.access_token;
+    const okMsg = 'authorization:github:success:'+JSON.stringify({token:token});
+    const html = page(okMsg);
+    return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: html };
+  }catch(err){
+    return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}, body: errPage((err&&err.message)?err.message:'Unexpected error') };
   }
-  const html = '<!doctype html><meta charset="utf-8"><title>OAuth Callback</title><body>Completing sign-in... You can close this window.</body><script>(function(){try{var p=new URLSearchParams(location.search);var msg={type:"oauth:done",provider:"github",success:!p.get("error"),code:(p.get("code")?p.get("code"):null),access_token:(p.get("access_token")?p.get("access_token"):null),state:(p.get("state")?p.get("state"):null),error:(p.get("error")?p.get("error"):null)};if(window.opener&&typeof window.opener.postMessage==="function"){window.opener.postMessage(msg,"https://splendid-hummingbird-b1b121.netlify.app");}setTimeout(function(){try{if(window.opener&&!window.opener.closed){window.close();}}catch(e){}},120);}catch(_){}})();</script>';
-  return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control':'no-store' }, body: html };
 };
