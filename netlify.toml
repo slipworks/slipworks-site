@@ -4,6 +4,8 @@
 [build.environment]
   HUGO_VERSION = "0.134.3"
   HUGO_ENV = "production"
+[functions]
+  directory = "netlify/functions"
 [[redirects]]
   from = "/admin"
   to = "/admin/index.html"
