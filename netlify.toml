@@ -2,7 +2,6 @@
 from = "/auth"
 to = "/.netlify/functions/oauth_auth"
 status = 200
-ECHO ÇÕ <ON> Ç≈Ç∑ÅB
 [[redirects]]
 from = "/callback"
 to = "/.netlify/functions/oauth_callback"
