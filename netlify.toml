@@ -18,6 +18,6 @@
   force = true
 [[redirects]]
   from = "/auth"
-  to = "/.netlify/functions/oauth"
+  to = "/.netlify/functions/decap-oauth"
   status = 200
   force = true
