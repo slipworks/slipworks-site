@@ -2,8 +2,8 @@ backend:
   name: github
   repo: slipworks/slipworks-site
   branch: main
-  base_url: /.netlify/functions
-  auth_endpoint: oauth-github
+  auth_endpoint: /.netlify/functions/oauth
+
 
 
 media_folder: "static/media"
