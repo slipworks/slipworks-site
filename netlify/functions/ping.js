@@ -1,4 +1,1 @@
-exports.handler = async function () {
-  return { statusCode: 200, body: 'ok' };
-};
-
+export function handler(){ return { statusCode: 200, headers: { 'Content-Type': 'text/plain' }, body: 'PING' }; }
