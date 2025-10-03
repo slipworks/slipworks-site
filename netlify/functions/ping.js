@@ -1,1 +1,1 @@
-export function handler(){ return { statusCode: 200, headers: { 'Content-Type': 'text/plain' }, body: 'PING' }; }
+export async function handler(){ return { statusCode:200, headers:{'content-type':'text/plain'}, body:'PING' }; }
