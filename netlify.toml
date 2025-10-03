@@ -1,7 +1,15 @@
+[build]
+command = "hugo"
+publish = "public"
+  [build.environment]
+  HUGO_VERSION = "0.150.1"
+  HUGO_ENV = "production"
+ECHO ÇÕ <ON> Ç≈Ç∑ÅB
 [[redirects]]
 from = "/auth"
 to = "/.netlify/functions/oauth_auth"
 status = 200
+ECHO ÇÕ <ON> Ç≈Ç∑ÅB
 [[redirects]]
 from = "/callback"
 to = "/.netlify/functions/oauth_callback"
