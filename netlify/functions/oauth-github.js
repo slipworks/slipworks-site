@@ -1,5 +1,1 @@
-'use strict'; 
- 
-exports.handler = async function (event) { 
-  return { statusCode: 200, headers: {'Content-Type':'text/plain'}, body: 'OK: minimal function' }; 
-}; 
+export async function handler() { return { statusCode: 200, headers: { 'Content-Type': 'text/plain' }, body: 'OK: ESM handler' }; }
