@@ -2,7 +2,7 @@ backend:
   name: github
   repo: slipworks/slipworks-site
   branch: main
-    auth_endpoint: https://splendid-hummingbird-b1b121.netlify.app/.netlify/functions/oauth
+  auth_endpoint: https://splendid-hummingbird-b1b121.netlify.app/.netlify/functions/decap-oauth
 
 
 
@@ -32,4 +32,7 @@ collections:
       - { label: "Publish Date", name: "date", widget: "datetime" }
       - { label: "Body", name: "body", widget: "markdown" }
       - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
+
+
+site_url: https://splendid-hummingbird-b1b121.netlify.app
 

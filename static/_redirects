@@ -1,8 +1,1 @@
-/.netlify/functions/decap-oauth/callback /.netlify/functions/decap-oauth 200
-/.netlify/functions/decap-oauth /.netlify/functions/decap-oauth 200
-/decap-oauth /.netlify/functions/decap-oauth 200
-/decap-oauth/callback /.netlify/functions/decap-oauth 200
-/.netlify/functions/oauth/callback /.netlify/functions/oauth 200
-/.netlify/functions/oauth /.netlify/functions/oauth 200
-/oauth /.netlify/functions/decap-oauth 200
-/oauth/callback /.netlify/functions/decap-oauth 200
+/admin/* /admin/index.html 200
