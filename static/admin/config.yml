@@ -2,14 +2,14 @@ backend:
   name: github
   repo: slipworks/slipworks-site
   branch: main
-  auth_endpoint: /.netlify/functions/oauth
+  auth_endpoint: /.netlify/functions/decap-oauth
 
 
 
 media_folder: "static/media"
 public_folder: "/media"
 
-local_backend: true  # ローカル編集時に使いたいなら残してOK
+local_backend: true  # ローカル編雁E��に使ぁE��ぁE��ら残してOK
 
 collections:
   - name: "pages"
