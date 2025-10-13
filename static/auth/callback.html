@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Decap OAuth Callback</title>
+<style>
+  body{font:14px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:880px}
+  pre{background:#f6f8fa;padding:12px;overflow:auto}
+  a{color:#06c;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .ok{color:#070}
+  .warn{color:#a60}
+</style>
+<body>
+<script>
+(function () {
+  function qs(k){
+    var m=location.search.match(new RegExp('[?&]'+k+'=([^&]+)'));
+    return m && decodeURIComponent(m[1]);
+  }
+  function qshash(k){
+    var m=location.hash.match(new RegExp('[#&]'+k+'=([^&]+)'));
+    return m && decodeURIComponent(m[1]);
+  }
+
+  var isFile = location.protocol === 'file:';
+  var selftest = (qs('selftest')==='1') || isFile; // file:// では自動自己試験ON
+  var origin = qs('origin') || (isFile ? 'file://' : (window.opener && window.opener.origin) || window.location.origin);
+  var token = qs('token') || qshash('token') || 'TEST_TOKEN_123';
+
+  var saved=false, posted=false, msg='';
+
+  // 1) localStorage 保存（Decap/Netlify CMS 双方の既定キー）
+  try{
+    var payload = { token: token, provider: 'github', expiry: Date.now() + 3600*1000 };
+    localStorage.setItem('decap-cms.user', JSON.stringify(payload));
+    localStorage.setItem('netlify-cms.user', JSON.stringify(payload));
+    saved = true;
+  }catch(e){
+    document.body.textContent = 'localStorage error: ' + e;
+    return;
+  }
+
+  // 2) 親へ postMessage（本番は opener 経由、file://自己試験では実行しない）
+  try{
+    if (!isFile && window.opener && !window.opener.closed){
+      window.opener.postMessage({ source:'decap-auth', token: token }, origin);
+      posted = true;
+      msg = 'POSTED to opener. You may close this window.';
+      setTimeout(function(){ window.close(); }, 400);
+    }
+  }catch(e){ /* no-op */ }
+
+  // 3) 画面表示（自己試験/デバッグ）
+  var lines = [
+    'DEBUG VIEW',
+    'href:    ' + location.href,
+    'search:  ' + (location.search||'(empty)'),
+    'hash:    ' + (location.hash||'(empty)'),
+    'selftest:' + String(selftest),
+    'origin:  ' + origin,
+    'token:   ' + token,
+    'saved:   ' + String(saved),
+    'posted:  ' + String(posted),
+    ''
+  ];
+
+  var status = '';
+  if (selftest){
+    status = 'SELFTEST OK';
+  }else if (posted){
+    status = 'POSTED to opener and closing...';
+  }else{
+    status = 'No opener. Token saved locally. You may close this window.';
+  }
+
+  document.body.innerHTML =
+    '<h1>Decap OAuth Callback</h1>' +
+    '<p class="'+(saved?'ok':'warn')+'">localStorage: ' + (saved?'saved':'FAILED') + '</p>' +
+    '<p>' + status + '</p>' +
+    '<pre>'+ lines.join('\n') +'</pre>' +
+    '<p><a href="?selftest=1">Selftest</a> | <a href="?">Normal</a></p>';
+})();
+</script>
+</body>
+
+
+
+
+

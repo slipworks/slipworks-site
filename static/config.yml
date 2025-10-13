@@ -1,0 +1,27 @@
+backend:
+  name: github
+  repo: dummy/dummy
+  branch: main
+  base_url: https://splendid-hummingbird-b1b121.netlify.app
+  auth_endpoint: /auth
+
+media_folder: "static/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: pages
+    label: Pages
+    files:
+      - file: "content/_index.md"
+        label: "Home"
+        name: "home"
+        fields:
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Body", name: "body", widget: "markdown" }
+
+
+
+
+
+
+

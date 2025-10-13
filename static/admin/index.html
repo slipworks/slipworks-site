@@ -1,5 +1,46 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Admin</title>
-<body>Loading Decap CMS...</body>
-<script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="robots" content="noindex" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Admin (UMD / minimal)</title>
+</head>
+<body>
+  <div id="nc-root"></div>
+
+  <script>
+    // 自動初期化を抑止（ライブラリのオート起動を防ぐ）
+    window.CMS_MANUAL_INIT = true;
+
+    (function () {
+      var s = document.createElement('script');
+      s.src = "/admin/vendor/netlify-cms-2.10.192.js"; // ← UMD（window.CMS を提供）
+      s.onload = function () {
+        document.body.innerHTML = '<div id="nc-root"></div>';
+
+        if (!window.CMS) {
+          console.error("window.CMS 未定義");
+          return;
+        }
+
+        // ★最小：コレクション0個で起動（重複エラーの切り分け）
+        window.CMS.init({
+          root: '#nc-root',
+          load_config_file: false,
+          config: {
+            backend: { name: 'test-repo' },
+            media_folder: 'static/uploads',
+            public_folder: '/uploads',
+            collections: []
+          }
+        });
+      };
+      s.onerror = function () {
+        console.error("Failed to load /admin/vendor/netlify-cms-2.10.192.js");
+      };
+      document.head.appendChild(s);
+    })();
+  </script>
+</body>
+</html>

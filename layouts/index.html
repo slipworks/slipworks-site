@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ .Site.Title }} | Home</title>
+<style>
+  body{font:16px/1.7 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:880px}
+  header,footer{opacity:.75}
+  code,pre{background:#f6f8fa;padding:.2em .4em;border-radius:4px}
+  a{color:#06c;text-decoration:none}a:hover{text-decoration:underline}
+  .hint{font-size:.9em;color:#555}
+</style>
+<body>
+<header>
+  <h1>{{ .Site.Title | default "Slipworks" }}</h1>
+  <p class="hint">Hugo minimal scaffold / Decap CMS 検証用</p>
+</header>
+
+<main>
+  {{ .Content }}
+
+  <h2>管理関連リンク</h2>
+  <ul>
+    <li><a href="/admin">/admin</a>（Decap 管理画面・本番デプロイ時に動作）</li>
+    <li><a href="/auth">/auth</a>（GitHub 認可入口・本番デプロイ時に動作）</li>
+  </ul>
+
+  <h3>ビルド情報</h3>
+  <ul>
+    <li>Hugo: <code>{{ hugo.Version }}</code></li>
+    <li>BaseURL: <code>{{ .Site.BaseURL }}</code></li>
+    <li>PublishDir: <code>public</code></li>
+  </ul>
+</main>
+
+<footer>
+  <p class="hint">© {{ now.Year }} Slipworks</p>
+</footer>
+</body>
+</html>
