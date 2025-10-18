@@ -1,0 +1,44 @@
+/* Utilities - These things get used a lot */
+
+/**
+ Hides stuff
+ */
+.hidden {
+    text-indent: -9999px;
+    visibility: hidden;
+    display: none;
+}
+
+/**
+ Creates a responsive wrapper that makes our content scale nicely
+ */
+.inner {
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/**
+ Centres vertically yo. (IE8+)
+ */
+.vertical {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+/**
+ Floating tools
+ */
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.clear {
+    clear: both;
+}/* custom: smaller menu buttons */
+.btn.site-menu{font-size:14px;padding:6px 12px;line-height:1.2;} 

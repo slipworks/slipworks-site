@@ -1,0 +1,53 @@
+<!-- minimal header video + scoped mobile centering (menu untouched) -->
+<video id="hero-video" autoplay muted loop playsinline poster="{{ "images/cover-image.jpg" | relURL }}"
+       style="width:100%;height:80vh;object-fit:cover;display:block;background:#000;"></video>
+
+<style>
+/* ヒーロー高さは80vh固定（チラ見せ） */
+#site-head{ height:80vh; }
+
+/* 狭幅のみ：#site-head 直下の .vertical と その .inner だけを中央化 */
+@media (max-width: 1000px){
+  #site-head .vertical{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    height:100% !important;
+    padding:0 16px !important;
+    background:transparent !important; /* 背景色で動画が隠れない */
+  }
+  /* ← ここが“唯一”の上書き対象。menu等の .inner には当たらない */
+  #site-head .vertical .inner{
+    float:none !important;
+    margin:0 auto !important;
+    padding:0 !important;
+    max-width:min(92vw,720px) !important;
+    text-align:center !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+  #site-head .vertical .blog-title,
+  #site-head .vertical .blog-description{
+    text-align:center !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+}
+</style>
+
+<script>
+(function(){
+  const picks = [
+    {webm:'{{ "images/hero1.webm" | relURL }}', mp4:'{{ "images/hero1.mp4" | relURL }}'},
+    {webm:'{{ "images/hero2.webm" | relURL }}', mp4:'{{ "images/hero2.mp4" | relURL }}'},
+    {webm:'{{ "images/hero3.webm" | relURL }}', mp4:'{{ "images/hero3.mp4" | relURL }}'},
+  ];
+  const v=document.getElementById('hero-video'); if(!v) return;
+  const one=picks[Math.floor(Math.random()*picks.length)];
+  if(one.webm){const sW=document.createElement('source'); sW.src=one.webm; sW.type='video/webm'; v.appendChild(sW);}
+  if(one.mp4){const sM=document.createElement('source'); sM.src=one.mp4;  sM.type='video/mp4';  v.appendChild(sM);}
+  v.muted=true; v.playsInline=true;
+  v.addEventListener('canplay',()=>v.play().catch(()=>{}),{once:true});
+  v.load();
+})();
+</script>

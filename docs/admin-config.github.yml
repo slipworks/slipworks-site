@@ -1,0 +1,22 @@
+# GitHub backend template (UTF-8 / LF)
+backend:
+  name: github
+  repo: YOUR_GITHUB_USER/YOUR_REPO   # ←後で実名に置換
+  branch: main
+  base_url: https://splendid-hummingbird-b1b121.netlify.app
+  auth_endpoint: /auth
+
+site_url: https://splendid-hummingbird-b1b121.netlify.app
+media_folder: "static/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "dummy"
+    label: "Dummy Content"
+    label_singular: "Dummy Entry"
+    folder: "content/dummy"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { name: "title", label: "Title", widget: "string" }
+      - { name: "body",  label: "Body",  widget: "text" }

@@ -1,0 +1,11 @@
+baseURL = "/"
+theme = "hugo-scroll"
+languageCode = "ja-jp"
+title = "Slipworks"
+# layouts/index.html を使うため theme は未指定（最小構成）
+# public へ出力（netlify.toml 側の publish = "public" と対応）
+publishDir = "public"
+
+# 将来 Decap のプレビューで使うときに有効化予定（今は最小）
+# [markup.goldmark.renderer]
+#   unsafe = true

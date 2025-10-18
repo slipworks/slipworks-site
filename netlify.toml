@@ -1,0 +1,41 @@
+# === Build ===
+[build]
+  command = "hugo"
+  publish = "public"
+
+[build.environment]
+  HUGO_VERSION = "0.150.1"
+  HUGO_ENV = "production"
+
+# === Functions ===
+[functions]
+  directory = "netlify/functions"
+
+# === Redirects / Routing ===
+# Admin は SPA フォールバックで 200
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin/index.html"
+  status = 200
+  force = true
+
+# OAuth エンドポイント（同一オリジンの Functions）
+[[redirects]]
+  from = "/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+  force = true
+
+# コールバック（固定・厳密一致）
+[[redirects]]
+  from = "/auth/callback"
+  to = "/.netlify/functions/oauth_callback"
+  status = 200
+  force = true
+

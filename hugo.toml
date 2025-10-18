@@ -1,0 +1,38 @@
+baseURL = "/"
+languageCode = "ja"
+defaultContentLanguage = "ja"
+title = "Slipworks Studio"
+theme = "hugo-scroll"
+
+# 不要ページを無効化
+disableKinds = ["section", "taxonomy", "term", "RSS", "robotsTXT"]
+
+enableEmoji = true
+
+[params]
+    favicon = "images/favicon.png"
+    images = ["images/cover-image.jpg"]
+    title_guard = false
+    title = "Slipworks Studio"
+    description = "スリップウェアと現代陶芸の作品集"
+    language_menu = false
+    show_current_lang = false
+    copyright = "© Slipworks Studio"
+    hidedesignbyline = true
+    invertSectionColors = false
+    image_options = "webp q90 lanczos photo"
+    combine_page_and_site_title = true
+
+    [params.footer]
+        showContactIcons = false
+        showFooterLinks = false
+
+    [params.meta]
+        keywords = "スリップウェア, 陶芸, 工房, Slipware, Ceramics, Pottery"
+
+# 多言語設定を完全にオフ
+[languages]
+  [languages.ja]
+    weight = 10
+    languageName = "日本語"
+    contentDir = "content/en"  # 当面は英語ディレクトリを再利用

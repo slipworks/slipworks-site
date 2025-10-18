@@ -1,0 +1,46 @@
+<!-- layouts/partials/custom_head.html -->
+<style>
+/* Mobile: 中央寄せ＋メニュー半透明（やや強めに指定） */
+@media (max-width: 900px){
+  /* ヒーロー内のテキスト群を中央へ */
+  header#header .inner,
+  header#header .content,
+  header#header .title,
+  header#header .actions,
+  header#header nav,
+  header#header p {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* ヒーローの内側コンテナをセンター配置＆幅制御 */
+  header#header .inner {
+    display: grid !important;
+    place-items: center !important;
+    max-width: 92vw;
+    padding: 0 1rem;
+  }
+
+  /* ボタンやナビの横並びを中央寄せ */
+  header#header .actions,
+  header#header nav,
+  header#header .content {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  /* メニューの背景を半透明黒に */
+  #menu {
+    background: rgba(0,0,0,.72) !important;
+  }
+}
+
+/* 動画タグのはみ出し防止（保険） */
+#hero-video > video {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+</style>

@@ -1,0 +1,21 @@
+<!-- layouts/shortcodes/heroVideo.html -->
+<div id="hero-video" style="position:relative;overflow:hidden;">
+  <video id="hv" autoplay muted loop playsinline preload="auto" style="width:100%;height:auto;object-fit:cover;">
+    <source id="hv-webm" src="/videos/hero1.webm" type="video/webm" />
+    <source id="hv-mp4"  src="/videos/hero1.mp4"  type="video/mp4" />
+  </video>
+</div>
+<script>
+(function(){
+  try{
+    var idx = 1 + Math.floor(Math.random()*3); // hero1-3 ランダム
+    var w = document.getElementById('hv-webm');
+    var m = document.getElementById('hv-mp4');
+    if (w) w.src = "/videos/hero"+idx+".webm";
+    if (m) m.src = "/videos/hero"+idx+".mp4";
+    var v = document.getElementById('hv');
+    if (v){ v.load(); v.play().catch(function(){}); }
+  }catch(e){}
+})();
+</script>
+

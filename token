@@ -1,0 +1,1 @@
+    document.body.innerHTML='SELFTEST OK<br saved to localStorage as "decap-cms.user".';

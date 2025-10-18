@@ -1,0 +1,16 @@
+backend:
+  name: test-repo   # ← ローカル専用の擬似バックエンド（OAuth不要）
+
+media_folder: "static/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "dummy"
+    label: "Dummy Content"
+    label_singular: "Dummy Entry"
+    folder: "content/dummy"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { name: "title", label: "Title", widget: "string" }
+      - { name: "body",  label: "Body",  widget: "text" }
